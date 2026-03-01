@@ -59,7 +59,7 @@ class WebRTCClient {
     // MARK: - HTTP Fallback (MVP)
     
     private func postFrameHTTP(_ frame: CapturedFrame) {
-        guard let url = URL(string: signalingURL.replacingOccurrences(of: "/webrtc/offer", with: "/frames/analyze")) else { return }
+        guard let url = URL(string: signalingURL.replacingOccurrences(of: "/webrtc/offer", with: "/frames")) else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
