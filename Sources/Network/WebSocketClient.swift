@@ -92,14 +92,27 @@ class WebSocketClient: NSObject {
             return
         }
         
-        guard let serverMsg = try? decoder.decode(ServerMessage.self, from: data) else {
-            print("[WS] Failed to decode message")
-            return
+        // Debug: log raw message
+        if let raw = String(data: data, encoding: .utf8) {
+            print("[WS] Received: \(raw.prefix(200))")
         }
+        
+        do {
+            let serverMsg = try decoder.decode(ServerMessage.self, from: data)
+            self.handleServerMessage(serverMsg)
+        } catch {
+            print("[WS] Decode error: \(error)")
+        }
+    }
+    
+    private func handleServerMessage(_ serverMsg: ServerMessage) {
+        
+        print("[WS] Message type: \(serverMsg.type)")
         
         DispatchQueue.main.async { [weak self] in
             switch serverMsg.payload {
             case .recommendations(let payload):
+                print("[WS] Got \(payload.recommendations.count) recommendations")
                 self?.onRecommendations?(payload)
             case .status(let payload):
                 self?.onStatus?(payload)

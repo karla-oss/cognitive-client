@@ -77,6 +77,12 @@ enum MetadataType: String, Codable {
 
 // MARK: - WebSocket: Server → Client
 
+enum ServerMessageType: String, Codable {
+    case recommendations
+    case status
+    case error
+}
+
 struct ServerMessage: Codable {
     let type: ServerMessageType
     let sessionID: String
@@ -89,38 +95,34 @@ struct ServerMessage: Codable {
         case timestamp
         case payload
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        type = try container.decode(ServerMessageType.self, forKey: .type)
+        sessionID = try container.decode(String.self, forKey: .sessionID)
+        timestamp = try container.decode(String.self, forKey: .timestamp)
+        
+        switch type {
+        case .recommendations:
+            let p = try container.decode(RecommendationPayload.self, forKey: .payload)
+            payload = .recommendations(p)
+        case .status:
+            let p = try container.decode(StatusPayload.self, forKey: .payload)
+            payload = .status(p)
+        case .error:
+            let p = try container.decode(ErrorPayload.self, forKey: .payload)
+            payload = .error(p)
+        }
+    }
 }
 
-enum ServerMessageType: String, Codable {
-    case recommendations
-    case status
-    case error
-}
-
-enum ServerPayload: Codable {
+enum ServerPayload {
     case recommendations(RecommendationPayload)
     case status(StatusPayload)
     case error(ErrorPayload)
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        
-        if let recs = try? container.decode(RecommendationPayload.self) {
-            self = .recommendations(recs)
-            return
-        }
-        if let status = try? container.decode(StatusPayload.self) {
-            self = .status(status)
-            return
-        }
-        if let error = try? container.decode(ErrorPayload.self) {
-            self = .error(error)
-            return
-        }
-        
-        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Unknown payload"))
-    }
-    
+}
+
+extension ServerPayload: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -128,6 +130,11 @@ enum ServerPayload: Codable {
         case .status(let s): try container.encode(s)
         case .error(let e): try container.encode(e)
         }
+    }
+    
+    init(from decoder: Decoder) throws {
+        // This shouldn't be called — ServerMessage.init handles it
+        throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Use ServerMessage decoder"))
     }
 }
 
