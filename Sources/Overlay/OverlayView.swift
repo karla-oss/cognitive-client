@@ -11,6 +11,8 @@ class OverlayView: NSView {
         
         guard !recommendations.isEmpty else { return }
         
+        print("[OverlayView] Drawing \(recommendations.count) recommendations in \(bounds)")
+        
         let bounds = self.bounds
         
         for rec in recommendations {
@@ -31,14 +33,14 @@ class OverlayView: NSView {
         let color = colorForType(rec.type)
         let alpha: CGFloat = CGFloat(rec.confidence) * 0.6
         
-        // Draw border highlight
-        let borderPath = NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4)
-        color.withAlphaComponent(alpha).setStroke()
-        borderPath.lineWidth = 2.0
+        // Draw border highlight — thick and visible
+        let borderPath = NSBezierPath(roundedRect: rect, xRadius: 6, yRadius: 6)
+        color.withAlphaComponent(0.9).setStroke()
+        borderPath.lineWidth = 4.0
         borderPath.stroke()
         
-        // Draw subtle fill
-        color.withAlphaComponent(alpha * 0.15).setFill()
+        // Draw visible fill
+        color.withAlphaComponent(0.25).setFill()
         borderPath.fill()
         
         // Draw label
