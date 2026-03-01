@@ -8,18 +8,13 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "CognitiveOverlay", targets: ["CognitiveOverlay"])
+        .executable(name: "CognitiveOverlayClient", targets: ["CognitiveOverlay"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/nicklama/swift-webrtc", from: "1.0.0"),
-        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.0"),
-    ],
+    dependencies: [],
     targets: [
         .executableTarget(
             name: "CognitiveOverlay",
-            dependencies: [
-                .product(name: "Starscream", package: "Starscream"),
-            ],
+            dependencies: [],
             path: "Sources"
         )
     ]
