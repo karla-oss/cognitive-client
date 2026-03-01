@@ -31,8 +31,6 @@ class OverlayView: NSView {
     
     private func drawRecommendation(_ rec: Recommendation, in rect: NSRect) {
         let color = colorForType(rec.type)
-        let alpha: CGFloat = CGFloat(rec.confidence) * 0.6
-        
         // Draw border highlight — thick and visible
         let borderPath = NSBezierPath(roundedRect: rect, xRadius: 6, yRadius: 6)
         color.withAlphaComponent(0.9).setStroke()
