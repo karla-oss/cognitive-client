@@ -60,19 +60,22 @@ class SessionController {
     private func connectServices(session: CreateSessionResponse) {
         print("[Session] Created: \(session.id)")
         
-        // 2. Connect WebSocket
+        // 2. Setup overlay FIRST (before WS so it's ready for recommendations)
+        overlayController = OverlayController()
+        overlayController?.show()
+        print("[Session] Overlay controller created")
+        
+        // 3. Connect WebSocket
         wsClient = WebSocketClient(url: session.wsURL)
         wsClient?.onRecommendations = { [weak self] payload in
+            print("[Session] onRecommendations callback: \(payload.recommendations.count) items")
+            print("[Session] overlayController is nil: \(self?.overlayController == nil)")
             self?.overlayController?.render(recommendations: payload.recommendations)
         }
         wsClient?.onStatus = { status in
             print("[Session] Status: \(status.state)")
         }
         wsClient?.connect()
-        
-        // 3. Setup overlay
-        overlayController = OverlayController()
-        overlayController?.show()
         
         // 4. Start screen capture + WebRTC
         webRTCClient = WebRTCClient(signalingURL: session.rtcURL, sessionID: session.id)
